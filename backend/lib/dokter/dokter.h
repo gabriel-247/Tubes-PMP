@@ -1,6 +1,6 @@
 #ifndef DOKTER_H
 #define DOKTER_H
-
+#include "../random_id/random_id.h"
 #define NAMA_MAKS 50
 #define DOKTER_MAKS 100
 
@@ -14,10 +14,11 @@ struct Dokter {
 };
 
 void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas);
-int baca_dokter_dari_file(struct Dokter *dokter, const char *nama_file);
 void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter,
                           const char *nama, int maks, int pagi, int siang, int malam);
-
+int baca_dokter_dari_file_csv(struct Dokter *dokter, const char *nama_file);
+void print_dokter(struct Dokter *dokter, int jumlah_dokter);
+void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id);
 
 #endif
 

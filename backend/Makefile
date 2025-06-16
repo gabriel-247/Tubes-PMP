@@ -9,6 +9,8 @@ SRC = main.c \
       routes/api_dokter.c \
       lib/random_id/random_id.c \
       lib/mongoose/mongoose.c \
+      lib/io/io.c \
+      lib/jadwal/jadwal.c \
       lib/dokter/dokter.c
 
 run: $(TARGET)

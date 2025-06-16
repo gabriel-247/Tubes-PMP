@@ -2,7 +2,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "dokter.h"
-#include "../random_id/random_id.h"
 
 // Tambah dokter tanpa interaksi terminal
 void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter,
@@ -24,7 +23,6 @@ void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter,
 
     (*jumlah_dokter)++;
 }
-
 
 // Menghapus dokter berdasarkan ID
 void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id) {
@@ -49,8 +47,28 @@ void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id) {
     printf("Dokter dengan ID %d berhasil dihapus.\n", id);
 }
 
+// Mengisi buffer json_dokter dengan isi JSON
+void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas) {
+    strcpy(json_dokter, "[");
+    for (int i = 0; i < jumlah_dokter; i++) {
+        char item[512];
+        snprintf(item, sizeof(item),
+                 "%s{ \"id\": \"%d\", \"nama\": \"%s\", \"maks\": \"%d\", \"pagi\": \"%d\", \"siang\": \"%d\", \"malam\": \"%d\" }",
+                 (i > 0) ? "," : "",
+                 dokter[i].id,
+                 dokter[i].nama,
+                 dokter[i].maks_shift_per_minggu,
+                 dokter[i].preferensi[0],
+                 dokter[i].preferensi[1],
+                 dokter[i].preferensi[2]);
+
+        strncat(json_dokter, item, kapasitas - strlen(json_dokter) - 1);
+    }
+    strncat(json_dokter, "]", kapasitas - strlen(json_dokter) - 1);
+}
+
 // Membaca data dokter dari file CSV dengan kolom id
-int baca_dokter_dari_file(struct Dokter *dokter, const char *nama_file) {
+int baca_dokter_dari_file_csv(struct Dokter *dokter, const char *nama_file) {
     FILE *file = fopen(nama_file, "r");
     if (!file) {
         printf("Tidak dapat membuka file %s\n", nama_file);
@@ -105,22 +123,11 @@ int baca_dokter_dari_file(struct Dokter *dokter, const char *nama_file) {
     return jumlah_dokter;
 }
 
-// Mengisi buffer json_dokter dengan isi JSON
-void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas) {
-    strcpy(json_dokter, "[");
+void print_dokter(struct Dokter *dokter, int jumlah_dokter) {
+    printf("\nDaftar Dokter:\n");
     for (int i = 0; i < jumlah_dokter; i++) {
-        char item[512];
-        snprintf(item, sizeof(item),
-                 "%s{ \"id\": \"%d\", \"nama\": \"%s\", \"maks\": \"%d\", \"pagi\": \"%d\", \"siang\": \"%d\", \"malam\": \"%d\" }",
-                 (i > 0) ? "," : "",
-                 dokter[i].id,
-                 dokter[i].nama,
-                 dokter[i].maks_shift_per_minggu,
-                 dokter[i].preferensi[0],
-                 dokter[i].preferensi[1],
-                 dokter[i].preferensi[2]);
-
-        strncat(json_dokter, item, kapasitas - strlen(json_dokter) - 1);
+        printf("ID: %d, Nama: %s, Maks Shift/Minggu: %d, Preferensi (Pagi, Siang, Malam): %d, %d, %d\n",
+               dokter[i].id, dokter[i].nama, dokter[i].maks_shift_per_minggu,
+               dokter[i].preferensi[0], dokter[i].preferensi[1], dokter[i].preferensi[2]);
     }
-    strncat(json_dokter, "]", kapasitas - strlen(json_dokter) - 1);
 }

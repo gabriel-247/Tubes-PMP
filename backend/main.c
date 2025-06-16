@@ -1,6 +1,17 @@
 #include "mongoose.h"
 #include "routes/routes.h"
-#define DOKTER_MAKS 100
+#include "lib/dokter/dokter.h"
+#include "lib/jadwal/jadwal.h"
+#include "lib/io/io.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Dokter dokter[DOKTER_MAKS];
+struct EntriJadwal jadwal[30];
+struct PelanggaranDokter pelanggaran[DOKTER_MAKS];
+int jumlah_dokter = 0, jumlah_jadwal = 0;
+char nama_file_dokter[] = "data/dokter.csv";
+char nama_file_jadwal[] = "data/jadwal.csv";
 
 int match(struct mg_str s, const char *cstr) {
   return (s.len == strlen(cstr) && strncmp(s.buf, cstr, s.len) == 0);
@@ -17,17 +28,20 @@ void handle_request(struct mg_connection *c, int ev, void *ev_data) {
     // POST /api/nama
     } else if (match(hm->method, "POST") && match(hm->uri, "/api/tes_post")) {
       handle_tes_post(c, hm);
-      
 
     // GET /api/tampilkan_dokter
     } else if (match(hm->method, "GET") && match(hm->uri, "/api/tampilkan_dokter")) {
-      handle_tampilkan_dokter(c, hm);
+      handle_tampilkan_dokter(c, hm, dokter, jumlah_dokter);
       
     // POST /api/tambah_dokter
     } else if (match(hm->method, "POST") && match(hm->uri, "/api/tambah_dokter")) {
-      handle_tambah_dokter(c, hm);
+      handle_tambah_dokter(c, hm, dokter, &jumlah_dokter);
 
-    } else if (match(hm->method, "OPTIONS")) {
+    //POST/api/hapus_dokter 
+    } else if (match(hm->method, "POST") && match(hm->uri, "/api/hapus_dokter")) {
+      handle_hapus_dokter(c, hm, dokter, &jumlah_dokter);
+
+    }else if (match(hm->method, "OPTIONS")) {
       mg_http_reply(c, 200,
         "Access-Control-Allow-Origin: *\r\n"
         "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
@@ -42,6 +56,10 @@ void handle_request(struct mg_connection *c, int ev, void *ev_data) {
 }
 
 int main(void) {
+  
+  jumlah_dokter = baca_dokter_dari_file(dokter, nama_file_dokter);
+  printf("Berhasil membaca %d dokter dari file.\n", jumlah_dokter);
+
   struct mg_mgr mgr; //Event management structure that holds a list of active connections, together with some housekeeping information
   mg_mgr_init(&mgr); //Initialize event manager structure
   mg_http_listen(&mgr, "http://localhost:8001", handle_request, NULL); //Create HTTP listener
