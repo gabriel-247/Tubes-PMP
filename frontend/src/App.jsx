@@ -1,0 +1,20 @@
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LandingPage from "./components/landing page/landingpage";
+import DashboardLayout from "./components/dashboard/dashboard";
+import Dokter from "./components/dashboard/dokter/dokter.jsx";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Landing page */}
+        <Route path="/" element={<LandingPage />} />
+        {/* Dashboard layout */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route path="dokter" element={<Dokter />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}

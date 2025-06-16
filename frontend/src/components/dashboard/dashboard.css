@@ -1,0 +1,14 @@
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: #fff;
+  overflow-y: auto;
+  transition: margin-left 0.3s;
+}
