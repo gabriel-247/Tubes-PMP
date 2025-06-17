@@ -6,10 +6,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Dokter dokter[DOKTER_MAKS];
+struct Dokter dokter[50];
 struct EntriJadwal jadwal[30];
-struct PelanggaranDokter pelanggaran[DOKTER_MAKS];
-int jumlah_dokter = 0, jumlah_jadwal = 0;
+struct PelanggaranDokter pelanggaran[50];
+int jumlah_dokter = 0;
+int jumlah_jadwal = 0;
 char nama_file_dokter[] = "data/dokter.csv";
 char nama_file_jadwal[] = "data/jadwal.csv";
 
@@ -41,6 +42,21 @@ void handle_request(struct mg_connection *c, int ev, void *ev_data) {
     } else if (match(hm->method, "POST") && match(hm->uri, "/api/hapus_dokter")) {
       handle_hapus_dokter(c, hm, dokter, &jumlah_dokter);
 
+    // POST /buat/buat_jadwal 
+    }else if (match(hm->method, "POST") && match(hm->uri, "/api/buat_jadwal")) {
+      handle_buat_jadwal(c, hm, dokter, jumlah_dokter, pelanggaran, jadwal, &jumlah_jadwal);
+
+      // POST /api/tampilkan_jadwal_bulanan
+    }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_bulanan")) {
+      handle_tampilkan_jadwal_bulanan(c, hm, jadwal, jumlah_jadwal);
+      // POST /api/tampilkan_jadwal_mingguan
+    }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_mingguan")) {
+      handle_tampilkan_jadwal_mingguan(c, hm, jadwal, jumlah_jadwal);
+      
+      // POST /api/tampilkan_jadwal_harian
+    }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_harian")) {
+      handle_tampilkan_jadwal_harian(c, hm, jadwal, jumlah_jadwal);
+      
     }else if (match(hm->method, "OPTIONS")) {
       mg_http_reply(c, 200,
         "Access-Control-Allow-Origin: *\r\n"

@@ -13,7 +13,7 @@ const Sidebar = () => {
         {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
       </button>
 
-      {!collapsed && <div className="sidebar-header">Scheduler</div>}
+      {!collapsed && <div className="sidebar-header">RS Scheduler</div>}
 
       <ul>
         <li>

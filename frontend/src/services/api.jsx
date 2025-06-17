@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8001/api";
+const BASE = "http://localhost:8001/api";
 
 export async function fetchWelcomeName() {
   const res = await fetch(`${BASE_URL}/tes_get`);
@@ -7,7 +7,7 @@ export async function fetchWelcomeName() {
 }
 
 export async function tampilkan_dokter() {
-  const res = await fetch(`${BASE_URL}/tampilkan_dokter`);
+  const res = await fetch(`${BASE}/tampilkan_dokter`);
   if (!res.ok) throw new Error("Gagal fetch data dokter");
   const data = await res.json();
   return data; // langsung array
@@ -29,4 +29,35 @@ export async function hapus_dokter(data) {
     body: JSON.stringify(data),
   });
   return res.json();
+}
+
+export async function buatJadwal() {
+  const res = await fetch(`${BASE}/buat_jadwal`, { method: "POST" });
+  return await res.json();
+}
+
+export async function tampilkanJadwalBulanan() {
+  const res = await fetch(`${BASE}/tampilkan_jadwal_bulanan`, {
+    method: "POST",
+  });
+  console.log("Response from tampilkanJadwalBulanan:", res);
+  return await res.json();
+}
+
+export async function tampilkanJadwalMingguan(minggu) {
+  const res = await fetch(`${BASE}/tampilkan_jadwal_mingguan`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ minggu }), // ✅ dikirim via body
+  });
+  return await res.json();
+}
+
+export async function tampilkanJadwalHarian(hari) {
+  const res = await fetch(`${BASE}/tampilkan_jadwal_harian`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ hari }), // ✅ dikirim via body
+  });
+  return await res.json();
 }

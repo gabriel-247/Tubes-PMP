@@ -8,7 +8,7 @@ export default function LandingPage({ onEnter }) {
   return (
     <div className="landing-container">
       <header className="landing-header">
-        <div className="logo">Scheduler</div>
+        <div className="logo">RS Scheduler</div>
         <button className="enter-btn" onClick={() => navigate("/dashboard/dokter")}>
           Go to App
         </button>
@@ -18,7 +18,7 @@ export default function LandingPage({ onEnter }) {
         <section className="hero-section">
           <div className="hero-text">
             <h1>Easy scheduling ahead</h1>
-            <p>Join professionals who easily book meetings with Scheduler. Simplify scheduling, eliminate back-and-forth emails.</p>
+            <p>Kelola jadwal shift dokter rumah sakit Anda dengan efisien, cepat, dan tanpa konflik.</p>
             <div className="hero-actions">
               <button className="google-btn">Sign up with Google</button>
             </div>
@@ -31,14 +31,14 @@ export default function LandingPage({ onEnter }) {
 
       <section className="brand-section">
         <div className="brand-message">
-          <h2>Calendly makes scheduling simple</h2>
-          <p>Calendly’s easy enough for individual users, and powerful enough to meet the needs of enterprise organizations — including 86% of the Fortune 500 companies.</p>
-          <button className="signup-btn">Sign up for free</button>
+          <h2>Solusi Modern untuk Penjadwalan Shift</h2>
+          <p>RS Scheduler dirangcang khusus untuk kebutuhan rumah sakit, klinik, dan fasilitas kesehatan lainnya. Otomatisasi dan fleksibel dalam satu platform</p>
+          <button className="signup-btn">Try for Free Now</button>
         </div>
       </section>
 
       <footer className="landing-footer">
-        <p>&copy; 2025 Scheduler Inc. All rights reserved.</p>
+        <p>&copy; 2025 RS Scheduler Inc. All rights reserved.</p>
       </footer>
     </div>
   );

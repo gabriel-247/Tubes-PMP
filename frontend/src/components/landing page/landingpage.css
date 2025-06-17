@@ -130,12 +130,12 @@
 .hero-image {
   flex: 1 1 450px;
   text-align: center;
-  min-width: 300px;
+  min-width: 800px;
 }
 
 .hero-image img {
   width: 100%;
-  max-width: 550px;
+  max-width: 630px;
   height: auto;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);

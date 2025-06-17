@@ -1,7 +1,8 @@
+#include "../dokter/dokter.h"
+#include "jadwal.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "jadwal.h"
 
 //Hitung pelanggaran dokter
 void hitung_pelanggaran(struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran) {
@@ -193,4 +194,23 @@ void tampilkan_pelanggaran(struct Dokter *dokter, struct PelanggaranDokter *pela
     for (int i = 0; i < jumlah_dokter; i++) {
         printf("\n%s (ID: %d)\nPelanggaran Preferensi: %d\nPelanggaran Shift: %d\n", dokter[i].nama, dokter[i].id, pelanggaran[i].preferensi, pelanggaran[i].maksimal_shift);
     }
+}
+
+void tampilkan_jadwal_bulanan_json(struct EntriJadwal *jadwal, int jumlah_jadwal, char *json_out, int kapasitas) {
+    strcpy(json_out, "[");  // Awal array JSON
+
+    for (int hari = 0; hari < jumlah_jadwal && hari < 30; hari++) {
+        char entri[256];
+        snprintf(entri, sizeof(entri),
+            "%s{ \"hari\": %d, \"pagi\": \"%s\", \"siang\": \"%s\", \"malam\": \"%s\" }",
+            (hari > 0 ? "," : ""),
+            hari + 1,
+            jadwal[hari].pagi,
+            jadwal[hari].siang,
+            jadwal[hari].malam);
+
+        strncat(json_out, entri, kapasitas - strlen(json_out) - 1);
+    }
+
+    strncat(json_out, "]", kapasitas - strlen(json_out) - 1); // Tutup array
 }

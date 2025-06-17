@@ -1,5 +1,6 @@
 #include "../lib/mongoose/mongoose.h"
 #include "../lib/dokter/dokter.h"
+#include "../lib/jadwal/jadwal.h"
 #include "routes.h"
 #include <stdio.h>
 #include <string.h>
@@ -36,28 +37,6 @@ void handle_tambah_dokter(struct mg_connection *c, struct mg_http_message *hm, s
     print_dokter(dokter, *jumlah_dokter);
     free(nama);  // malloc dari mg_json_get_str
 
-    // // Simpan ulang ke CSV
-    // FILE *file = fopen("data/dokter.csv", "w");
-    // if (!file) {
-    //     mg_http_reply(c, 500,
-    //         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-    //         "{ \"status\": \"error\", \"message\": \"Gagal membuka file\" }");
-    //     return;
-    // }
-
-    // // Header + tulis ulang isi dokter
-    // fprintf(file, "id,Nama,MaksShiftPerMinggu,PagiPref,SiangPref,MalamPref\n");
-    // for (int i = 0; i < jumlah_dokter; i++) {
-    //     fprintf(file, "%d,%s,%d,%d,%d,%d\n",
-    //         dokter[i].id,
-    //         dokter[i].nama,
-    //         dokter[i].maks_shift_per_minggu,
-    //         dokter[i].preferensi[0],
-    //         dokter[i].preferensi[1],
-    //         dokter[i].preferensi[2]);
-    // }
-    // fclose(file);
-
     // Respon sukses
     mg_http_reply(c, 200,
         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
@@ -92,4 +71,92 @@ void handle_tampilkan_dokter(struct mg_connection *c, struct mg_http_message *hm
     mg_http_reply(c, 200,
         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
         "%s", json);
+}
+
+void handle_buat_jadwal(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran, struct EntriJadwal *jadwal, int *jumlah_jadwal){
+    buat_jadwal(dokter, jumlah_dokter, pelanggaran, jadwal, jumlah_jadwal);
+    printf("Jadwal berhasil dibuat\n");
+    mg_http_reply(c, 200,
+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+        "{ \"status\": \"success\", \"message\": \"Jadwal berhasil dibuat\" }");
+};
+
+void handle_tampilkan_jadwal_bulanan(struct mg_connection *c, struct mg_http_message *hm,
+                                     struct EntriJadwal *jadwal, int jumlah_jadwal) {
+    char json[4096];
+    tampilkan_jadwal_bulanan_json(jadwal, jumlah_jadwal, json, sizeof(json));
+
+    mg_http_reply(c, 200,
+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+        "%s", json);
+    printf("Jadwal bulanan berhasil ditampilkan\n");
+}
+
+void handle_tampilkan_jadwal_mingguan(struct mg_connection *c, struct mg_http_message *hm,
+                                      struct EntriJadwal *jadwal, int jumlah_jadwal) {
+    double minggu_ke_raw;
+    int valid = mg_json_get_num(hm->body, "$.minggu", &minggu_ke_raw);
+    int minggu_ke = (int) minggu_ke_raw;
+
+    if (!valid || minggu_ke < 1 || minggu_ke > 4) {
+        mg_http_reply(c, 400,
+            "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+            "{ \"status\": \"error\", \"message\": \"Input minggu harus antara 1-4\" }");
+        return;
+    }
+
+    int start = (minggu_ke - 1) * 7;
+    int end = start + 7;
+
+    char json[4096] = {0};
+    strcat(json, "[");
+
+    for (int hari = start; hari < end && hari < jumlah_jadwal; hari++) {
+        char entri[256];
+        snprintf(entri, sizeof(entri),
+            "{ \"hari\": %d, \"pagi\": \"%s\", \"siang\": \"%s\", \"malam\": \"%s\" }%s",
+            hari + 1,
+            jadwal[hari].pagi,
+            jadwal[hari].siang,
+            jadwal[hari].malam,
+            (hari < end - 1 && hari < jumlah_jadwal - 1) ? "," : ""
+        );
+        strcat(json, entri);
+    }
+
+    strcat(json, "]");
+
+    mg_http_reply(c, 200,
+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+        "%s", json);
+    printf("Jadwal mingguan berhasil ditampilkan untuk minggu ke %d\n", minggu_ke);
+}
+
+void handle_tampilkan_jadwal_harian(struct mg_connection *c, struct mg_http_message *hm,
+                                    struct EntriJadwal *jadwal, int jumlah_jadwal) {
+    double hari_raw;
+    int valid = mg_json_get_num(hm->body, "$.hari", &hari_raw);
+    int hari = (int) hari_raw;
+
+    // Validasi
+    if (!valid || hari < 1 || hari > jumlah_jadwal) {
+        mg_http_reply(c, 400,
+            "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+            "{ \"status\": \"error\", \"message\": \"Input hari harus antara 1-30\" }");
+        return;
+    }
+
+    int idx = hari - 1;
+    char json[256];
+    snprintf(json, sizeof(json),
+        "{ \"hari\": %d, \"pagi\": \"%s\", \"siang\": \"%s\", \"malam\": \"%s\" }",
+        hari,
+        jadwal[idx].pagi,
+        jadwal[idx].siang,
+        jadwal[idx].malam);
+
+    mg_http_reply(c, 200,
+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+        "%s", json);
+    printf("Jadwal harian berhasil ditampilkan untuk hari ke %d\n", hari);
 }

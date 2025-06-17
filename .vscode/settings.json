@@ -6,6 +6,8 @@
     "random_id.h": "c",
     "dokter.h": "c",
     "json_utils.h": "c",
-    "io.h": "c"
+    "io.h": "c",
+    "jadwal.h": "c",
+    "string.h": "c"
   }
 }

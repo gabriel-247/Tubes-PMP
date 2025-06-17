@@ -1,6 +1,5 @@
 #ifndef JADWAL_H
 #define JADWAL_H
-#include "../dokter/dokter.h"
 
 struct EntriJadwal {
     char pagi[NAMA_MAKS]; // Nama dokter untuk shift pagi
@@ -23,5 +22,7 @@ void tampilkan_jadwal_mingguan(struct EntriJadwal *jadwal, int jumlah_jadwal, in
 void tampilkan_jadwal_bulanan(struct EntriJadwal *jadwal, int jumlah_jadwal);
 void tampilkan_jumlah_shift_dokter(struct Dokter *dokter, int jumlah_dokter);
 void tampilkan_pelanggaran(struct Dokter *dokter, struct PelanggaranDokter *pelanggaran, int jumlah_dokter);
+
+void tampilkan_jadwal_bulanan_json(struct EntriJadwal *jadwal, int jumlah_jadwal, char *json_out, int kapasitas);
 
 #endif
