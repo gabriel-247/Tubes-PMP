@@ -104,10 +104,16 @@ void buat_jadwal(struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDok
                 dokter[terpilih].shift_ditugaskan[hari][shift] = 1;
                 if (shift == 0) {
                     strcpy(jadwal[hari].pagi, dokter[terpilih].nama);
+                    //increment total shift
+                    dokter[terpilih].total_shift++;
                 } else if (shift == 1) {
                     strcpy(jadwal[hari].siang, dokter[terpilih].nama);
+                    //increment total shift
+                    dokter[terpilih].total_shift++;
                 } else if (shift == 2) {
                     strcpy(jadwal[hari].malam, dokter[terpilih].nama);
+                    //increment total shift
+                    dokter[terpilih].total_shift++;
                 }
             }
         }
@@ -218,7 +224,6 @@ void tampilkan_report_shift(struct Dokter *dokter, struct PelanggaranDokter *pel
     }
     strcat(json, "]");
 }
-
 
 void tampilkan_jadwal_bulanan_json(struct EntriJadwal *jadwal, int jumlah_jadwal, char *json_out, int kapasitas) {
     strcpy(json_out, "[");  // Awal array JSON
