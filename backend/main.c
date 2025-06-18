@@ -56,7 +56,9 @@ void handle_request(struct mg_connection *c, int ev, void *ev_data) {
       // POST /api/tampilkan_jadwal_harian
     }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_harian")) {
       handle_tampilkan_jadwal_harian(c, hm, jadwal, jumlah_jadwal);
-      
+      // POST /api/tampilkan_report_shift
+    }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_report_shift")) {
+      handle_tampilkan_report_shift(c, hm, dokter, jumlah_dokter, pelanggaran);
     }else if (match(hm->method, "OPTIONS")) {
       mg_http_reply(c, 200,
         "Access-Control-Allow-Origin: *\r\n"

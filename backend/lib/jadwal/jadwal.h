@@ -24,5 +24,5 @@ void tampilkan_jumlah_shift_dokter(struct Dokter *dokter, int jumlah_dokter);
 void tampilkan_pelanggaran(struct Dokter *dokter, struct PelanggaranDokter *pelanggaran, int jumlah_dokter);
 
 void tampilkan_jadwal_bulanan_json(struct EntriJadwal *jadwal, int jumlah_jadwal, char *json_out, int kapasitas);
-
+void tampilkan_report_shift(struct Dokter *dokter, struct PelanggaranDokter *pelanggaran, int jumlah_dokter, char *json, int kapasitas);
 #endif

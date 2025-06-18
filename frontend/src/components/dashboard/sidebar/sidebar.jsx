@@ -29,9 +29,9 @@ const Sidebar = () => {
           </NavLink>
         </li>
         <li>
-          <NavLink to="settings">
+          <NavLink to="report">
             <FaCogs />
-            {!collapsed && "Settings"}
+            {!collapsed && "Report"}
           </NavLink>
         </li>
       </ul>

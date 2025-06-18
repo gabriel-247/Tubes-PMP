@@ -61,3 +61,10 @@ export async function tampilkanJadwalHarian(hari) {
   });
   return await res.json();
 }
+
+export async function tampilkanReportShift() {
+  const res = await fetch("http://localhost:8001/api/tampilkan_report_shift", {
+    method: "POST",
+  });
+  return await res.json(); // return array report shift semua dokter
+}

@@ -160,3 +160,12 @@ void handle_tampilkan_jadwal_harian(struct mg_connection *c, struct mg_http_mess
         "%s", json);
     printf("Jadwal harian berhasil ditampilkan untuk hari ke %d\n", hari);
 }
+void handle_tampilkan_report_shift(struct mg_connection *c, struct mg_http_message *hm,
+                                    struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran) {
+    char json[8192];  // pastikan cukup besar
+    tampilkan_report_shift(dokter, pelanggaran, jumlah_dokter, json, sizeof(json));
+
+    mg_http_reply(c, 200,
+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+        "%s", json);
+}

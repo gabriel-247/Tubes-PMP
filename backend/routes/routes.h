@@ -17,5 +17,7 @@ void handle_tampilkan_jadwal_mingguan(struct mg_connection *c, struct mg_http_me
                                       struct EntriJadwal *jadwal, int jumlah_jadwal);
 void handle_tampilkan_jadwal_harian(struct mg_connection *c, struct mg_http_message *hm,
                                     struct EntriJadwal *jadwal, int jumlah_jadwal);
+void handle_tampilkan_report_shift(struct mg_connection *c, struct mg_http_message *hm,
+                                    struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran);
 #endif
 

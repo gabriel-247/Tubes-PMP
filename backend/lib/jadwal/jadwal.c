@@ -196,6 +196,30 @@ void tampilkan_pelanggaran(struct Dokter *dokter, struct PelanggaranDokter *pela
     }
 }
 
+#include <stdio.h>
+#include <string.h>
+
+void tampilkan_report_shift(struct Dokter *dokter, struct PelanggaranDokter *pelanggaran, int jumlah_dokter, char *json, int kapasitas) {
+    hitung_pelanggaran(dokter, jumlah_dokter, pelanggaran);
+
+    strcpy(json, "[");
+    for (int i = 0; i < jumlah_dokter; i++) {
+        char buffer[512];
+        snprintf(buffer, sizeof(buffer),
+            "{ \"id\": %d, \"nama\": \"%s\", \"pelanggaran_preferensi\": %d, \"pelanggaran_shift\": %d, \"total_shift\": %d }%s",
+            dokter[i].id,
+            dokter[i].nama,
+            pelanggaran[i].preferensi,
+            pelanggaran[i].maksimal_shift,
+            dokter[i].total_shift,
+            (i < jumlah_dokter - 1) ? "," : ""
+        );
+        strncat(json, buffer, kapasitas - strlen(json) - 1);
+    }
+    strcat(json, "]");
+}
+
+
 void tampilkan_jadwal_bulanan_json(struct EntriJadwal *jadwal, int jumlah_jadwal, char *json_out, int kapasitas) {
     strcpy(json_out, "[");  // Awal array JSON
 
