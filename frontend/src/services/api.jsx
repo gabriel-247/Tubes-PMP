@@ -10,7 +10,7 @@ export async function tampilkan_dokter() {
   const res = await fetch(`${BASE}/tampilkan_dokter`);
   if (!res.ok) throw new Error("Gagal fetch data dokter");
   const data = await res.json();
-  return data; // langsung array
+  return data;
 }
 
 export async function tambah_dokter(data) {
@@ -48,7 +48,7 @@ export async function tampilkanJadwalMingguan(minggu) {
   const res = await fetch(`${BASE}/tampilkan_jadwal_mingguan`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ minggu }), // ✅ dikirim via body
+    body: JSON.stringify({ minggu }),
   });
   return await res.json();
 }
@@ -57,7 +57,7 @@ export async function tampilkanJadwalHarian(hari) {
   const res = await fetch(`${BASE}/tampilkan_jadwal_harian`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ hari }), // ✅ dikirim via body
+    body: JSON.stringify({ hari }), //
   });
   return await res.json();
 }
@@ -66,5 +66,5 @@ export async function tampilkanReportShift() {
   const res = await fetch("http://localhost:8001/api/tampilkan_report_shift", {
     method: "POST",
   });
-  return await res.json(); // return array report shift semua dokter
+  return await res.json();
 }

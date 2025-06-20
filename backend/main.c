@@ -74,11 +74,10 @@ void handle_request(struct mg_connection *c, int ev, void *ev_data) {
 }
 
 int main(void) {
-  
-  jumlah_dokter = baca_dokter_dari_file(dokter, nama_file_dokter);
+  jumlah_dokter = baca_dokter_dari_file(dokter, nama_file_dokter); // Read doctors from file when starting the server
   printf("Berhasil membaca %d dokter dari file.\n", jumlah_dokter);
 
-  struct mg_mgr mgr; //Event management structure that holds a list of active connections, together with some housekeeping information
+  struct mg_mgr mgr; //Event management structure that holds a list of active connections
   mg_mgr_init(&mgr); //Initialize event manager structure
   mg_http_listen(&mgr, "http://localhost:8001", handle_request, NULL); //Create HTTP listener
   printf("Server aktif di http://localhost:8001\n");

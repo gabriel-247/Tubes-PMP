@@ -17,7 +17,6 @@ export default function App() {
           <Route path="dokter" element={<Dokter />} />
           <Route path="jadwal" element={<Jadwal />} />
           <Route path="report" element={<Report />} />
-          {/* Tambahkan rute lain di sini jika perlu */}
         </Route>
       </Routes>
     </BrowserRouter>
