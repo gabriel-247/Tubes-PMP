@@ -1,0 +1,13 @@
+{
+  "files.associations": {
+    "mongoose.h": "c",
+    "time.h": "c",
+    "routes.h": "c",
+    "random_id.h": "c",
+    "dokter.h": "c",
+    "json_utils.h": "c",
+    "io.h": "c",
+    "jadwal.h": "c",
+    "string.h": "c"
+  }
+}
