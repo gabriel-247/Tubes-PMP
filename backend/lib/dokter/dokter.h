@@ -14,8 +14,7 @@ struct Dokter {
 };
 
 void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas);
-void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter,
-                          const char *nama, int maks, int pagi, int siang, int malam);
+void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter, const char *nama, int maks, int pagi, int siang, int malam);
 int baca_dokter_dari_file_csv(struct Dokter *dokter, const char *nama_file);
 void print_dokter(struct Dokter *dokter, int jumlah_dokter);
 void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id);

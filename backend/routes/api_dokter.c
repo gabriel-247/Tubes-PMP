@@ -1,6 +1,7 @@
 #include "../lib/mongoose/mongoose.h"
 #include "../lib/dokter/dokter.h"
 #include "../lib/jadwal/jadwal.h"
+#include "../lib/io/io.h"
 #include "routes.h"
 #include <stdio.h>
 #include <string.h>
@@ -79,6 +80,8 @@ void handle_buat_jadwal(struct mg_connection *c, struct mg_http_message *hm, str
     mg_http_reply(c, 200,
         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
         "{ \"status\": \"success\", \"message\": \"Jadwal berhasil dibuat\" }");
+    simpan_jadwal_ke_file(jadwal, *jumlah_jadwal, "data/jadwal.csv");
+
 };
 
 void handle_tampilkan_jadwal_bulanan(struct mg_connection *c, struct mg_http_message *hm,
