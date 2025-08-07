@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { tampilkan_dokter, tambah_dokter, hapus_dokter } from "../../../services/api";
+import {
+  tampilkan_dokter,
+  tambah_dokter,
+  hapus_dokter,
+  update_dokter,
+} from "../../../services/api";
 import "./dokter.css";
 
 const Dokter = () => {
@@ -45,6 +50,7 @@ const Dokter = () => {
       setForm({ nama: "", maks: "", pagi: 0, siang: 0, malam: 0 });
       getData();
     } catch (err) {
+      console.error(err);
       alert("Gagal menambahkan dokter.");
     }
   };
@@ -55,8 +61,21 @@ const Dokter = () => {
         await hapus_dokter({ id: parseInt(id) });
         getData();
       } catch (err) {
+        console.error(err);
         alert("Gagal menghapus dokter.");
       }
+    }
+  };
+
+  const handleUpdate = async (id, nama) => {
+    const namaBaru = window.prompt("Masukkan nama baru", nama);
+    if (!namaBaru) return;
+    try {
+      await update_dokter({ id: parseInt(id), nama: namaBaru });
+      getData();
+    } catch (err) {
+      console.error(err);
+      alert("Gagal memperbarui nama dokter.");
     }
   };
 
@@ -89,6 +108,12 @@ const Dokter = () => {
               <td>{dokter.siang}</td>
               <td>{dokter.malam}</td>
               <td>
+                <button
+                  className="btn-edit"
+                  onClick={() => handleUpdate(dokter.id, dokter.nama)}
+                >
+                  Edit
+                </button>
                 <button className="btn-hapus" onClick={() => handleDelete(dokter.id)}>
                   Hapus
                 </button>

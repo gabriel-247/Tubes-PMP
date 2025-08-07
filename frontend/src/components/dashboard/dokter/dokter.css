@@ -62,6 +62,16 @@
   cursor: pointer;
 }
 
+.btn-edit {
+  padding: 4px 8px;
+  background-color: #ffc107;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
 .btn-hapus {
   padding: 4px 8px;
   background-color: crimson;
