@@ -31,6 +31,15 @@ export async function hapus_dokter(data) {
   return res.json();
 }
 
+export async function update_dokter(data) {
+  const res = await fetch("http://localhost:8001/api/update_dokter", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
 export async function buatJadwal() {
   const res = await fetch(`${BASE}/buat_jadwal`, { method: "POST" });
   return await res.json();
