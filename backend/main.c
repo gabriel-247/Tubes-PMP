@@ -38,11 +38,15 @@ void handle_request(struct mg_connection *c, int ev, void *ev_data) {
     } else if (match(hm->method, "POST") && match(hm->uri, "/api/tambah_dokter")) {
       handle_tambah_dokter(c, hm, dokter, &jumlah_dokter);
 
-    //POST/api/hapus_dokter 
+    //POST/api/hapus_dokter
     } else if (match(hm->method, "POST") && match(hm->uri, "/api/hapus_dokter")) {
       handle_hapus_dokter(c, hm, dokter, &jumlah_dokter);
 
-    // POST /buat/buat_jadwal 
+    // POST /api/update_dokter
+    } else if (match(hm->method, "POST") && match(hm->uri, "/api/update_dokter")) {
+      handle_update_dokter(c, hm, dokter, jumlah_dokter);
+
+    // POST /buat/buat_jadwal
     }else if (match(hm->method, "POST") && match(hm->uri, "/api/buat_jadwal")) {
       handle_buat_jadwal(c, hm, dokter, jumlah_dokter, pelanggaran, jadwal, &jumlah_jadwal);
 

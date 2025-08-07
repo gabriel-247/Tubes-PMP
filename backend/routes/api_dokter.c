@@ -66,6 +66,41 @@ void handle_hapus_dokter(struct mg_connection *c, struct mg_http_message *hm, st
         "{ \"status\": \"success\", \"message\": \"Dokter berhasil dihapus\" }");
 }
 
+void handle_update_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter) {
+    double id_d;
+    char *nama = mg_json_get_str(hm->body, "$.nama");
+    int valid = mg_json_get_num(hm->body, "$.id", &id_d);
+
+    if (!valid || !nama) {
+        mg_http_reply(c, 400,
+            "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+            "{ \"status\": \"error\", \"message\": \"Field tidak lengkap atau invalid\" }");
+        if (nama) free(nama);
+        return;
+    }
+
+    int id = (int) id_d;
+    int found = 0;
+    for (int i = 0; i < jumlah_dokter; i++) {
+        if (dokter[i].id == id) { found = 1; break; }
+    }
+
+    if (!found) {
+        mg_http_reply(c, 404,
+            "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+            "{ \"status\": \"error\", \"message\": \"Dokter tidak ditemukan\" }");
+        free(nama);
+        return;
+    }
+
+    update_nama_dokter(dokter, jumlah_dokter, id, nama);
+    simpan_dokter_ke_file(dokter, jumlah_dokter, "data/dokter.csv");
+    mg_http_reply(c, 200,
+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
+        "{ \"status\": \"success\", \"message\": \"Nama dokter diperbarui\" }");
+    free(nama);
+}
+
 void handle_tampilkan_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter ) {
     char json[4096];
     tampilkan_dokter(dokter, jumlah_dokter, json, sizeof(json));

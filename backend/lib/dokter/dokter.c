@@ -47,6 +47,18 @@ void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id) {
     printf("Dokter dengan ID %d berhasil dihapus.\n", id);
 }
 
+void update_nama_dokter(struct Dokter *dokter, int jumlah_dokter, int id, const char *nama_baru) {
+    for (int i = 0; i < jumlah_dokter; i++) {
+        if (dokter[i].id == id) {
+            strncpy(dokter[i].nama, nama_baru, NAMA_MAKS - 1);
+            dokter[i].nama[NAMA_MAKS - 1] = '\0';
+            printf("Nama dokter dengan ID %d berhasil diubah menjadi %s.\n", id, dokter[i].nama);
+            return;
+        }
+    }
+    printf("Dokter dengan ID %d tidak ditemukan.\n", id);
+}
+
 // Mengisi buffer json_dokter dengan isi JSON
 void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas) {
     strcpy(json_dokter, "[");
