@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "./landingpage.css";
 
-export default function LandingPage({ onEnter }) {
+export default function LandingPage() {
   const navigate = useNavigate();
   return (
     <div className="landing-container">

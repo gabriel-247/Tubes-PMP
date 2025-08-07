@@ -1,7 +1,7 @@
 const BASE = "http://localhost:8001/api";
 
 export async function fetchWelcomeName() {
-  const res = await fetch(`${BASE_URL}/tes_get`);
+  const res = await fetch(`${BASE}/tes_get`);
   if (!res.ok) throw new Error("Network response was not ok");
   return res.json();
 }
