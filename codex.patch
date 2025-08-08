@@ -1,286 +1,5 @@
-diff --git a/backend/lib/dokter/dokter.c b/backend/lib/dokter/dokter.c
-index ebbdbff8dd8e240e9b8a53844c3dc98d3d601b4c..1f676640a8e74c490f6b514c788d1505e184d485 100644
---- a/backend/lib/dokter/dokter.c
-+++ b/backend/lib/dokter/dokter.c
-@@ -25,50 +25,62 @@ void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter,
- }
- 
- // Menghapus dokter berdasarkan ID
- void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id) {
-     int indeks = -1;
-     for (int i = 0; i < *jumlah_dokter; i++) {
-         if (dokter[i].id == id) {
-             indeks = i;
-             break;
-         }
-     }
- 
-     if (indeks == -1) {
-         printf("Dokter dengan ID %d tidak ditemukan.\n", id);
-         return;
-     }
- 
-     for (int i = indeks; i < *jumlah_dokter - 1; i++) {
-         dokter[i] = dokter[i + 1];
-     }
- 
-     (*jumlah_dokter)--;
-     printf("Dokter dengan ID %d berhasil dihapus.\n", id);
- }
- 
-+void update_nama_dokter(struct Dokter *dokter, int jumlah_dokter, int id, const char *nama_baru) {
-+    for (int i = 0; i < jumlah_dokter; i++) {
-+        if (dokter[i].id == id) {
-+            strncpy(dokter[i].nama, nama_baru, NAMA_MAKS - 1);
-+            dokter[i].nama[NAMA_MAKS - 1] = '\0';
-+            printf("Nama dokter dengan ID %d berhasil diubah menjadi %s.\n", id, dokter[i].nama);
-+            return;
-+        }
-+    }
-+    printf("Dokter dengan ID %d tidak ditemukan.\n", id);
-+}
-+
- // Mengisi buffer json_dokter dengan isi JSON
- void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas) {
-     strcpy(json_dokter, "[");
-     for (int i = 0; i < jumlah_dokter; i++) {
-         char item[512];
-         snprintf(item, sizeof(item),
-                  "%s{ \"id\": \"%d\", \"nama\": \"%s\", \"maks\": \"%d\", \"pagi\": \"%d\", \"siang\": \"%d\", \"malam\": \"%d\" }",
-                  (i > 0) ? "," : "",
-                  dokter[i].id,
-                  dokter[i].nama,
-                  dokter[i].maks_shift_per_minggu,
-                  dokter[i].preferensi[0],
-                  dokter[i].preferensi[1],
-                  dokter[i].preferensi[2]);
- 
-         strncat(json_dokter, item, kapasitas - strlen(json_dokter) - 1);
-     }
-     strncat(json_dokter, "]", kapasitas - strlen(json_dokter) - 1);
- }
- 
- // Membaca data dokter dari file CSV dengan kolom id
- int baca_dokter_dari_file_csv(struct Dokter *dokter, const char *nama_file) {
-     FILE *file = fopen(nama_file, "r");
-     if (!file) {
-         printf("Tidak dapat membuka file %s\n", nama_file);
-diff --git a/backend/lib/dokter/dokter.h b/backend/lib/dokter/dokter.h
-index 6fe547eeb0a2e212535d20080383f8564d45c1f5..a1081ee55b290308f17e77097c7c3a7bc0343bc8 100644
---- a/backend/lib/dokter/dokter.h
-+++ b/backend/lib/dokter/dokter.h
-@@ -1,23 +1,24 @@
- #ifndef DOKTER_H
- #define DOKTER_H
- #include "../random_id/random_id.h"
- #define NAMA_MAKS 50
- #define DOKTER_MAKS 100
- 
- struct Dokter {
-     int id; // ID dokter
-     char nama[NAMA_MAKS];
-     int maks_shift_per_minggu;
-     int preferensi[3]; // 0: pagi, 1: siang, 2: malam (0 = diinginkan, 1 = tidak diinginkan)
-     int shift_ditugaskan[30][3]; // Melacak shift untuk 30 hari, 3 shift per hari
-     int total_shift; // Total shift yang ditugaskan
- };
- 
- void tampilkan_dokter(struct Dokter *dokter, int jumlah_dokter, char *json_dokter, int kapasitas);
- void tambah_dokter_manual(struct Dokter *dokter, int *jumlah_dokter, const char *nama, int maks, int pagi, int siang, int malam);
- int baca_dokter_dari_file_csv(struct Dokter *dokter, const char *nama_file);
- void print_dokter(struct Dokter *dokter, int jumlah_dokter);
- void hapus_dokter(struct Dokter *dokter, int *jumlah_dokter, int id);
-+void update_nama_dokter(struct Dokter *dokter, int jumlah_dokter, int id, const char *nama_baru);
- 
- #endif
- 
-diff --git a/backend/main.c b/backend/main.c
-index 838612f29bf4eaaf991d31a6ed97136a8ee85cfd..c8b5b79b6ff0823cadbbe0f358d98330c6260d29 100644
---- a/backend/main.c
-+++ b/backend/main.c
-@@ -16,55 +16,59 @@ char nama_file_jadwal[] = "data/jadwal.csv";
- 
- int match(struct mg_str s, const char *cstr) {
-   return (s.len == strlen(cstr) && strncmp(s.buf, cstr, s.len) == 0);
- }
- 
- void handle_request(struct mg_connection *c, int ev, void *ev_data) {
-   if (ev == MG_EV_HTTP_MSG) {
-     struct mg_http_message *hm = (struct mg_http_message *) ev_data;
- 
-     // GET /api/hello
-     if (match(hm->method, "GET") && match(hm->uri, "/api/tes_get")) {
-       handle_tes_get(c, hm);
- 
-     // POST /api/nama
-     } else if (match(hm->method, "POST") && match(hm->uri, "/api/tes_post")) {
-       handle_tes_post(c, hm);
- 
-     // GET /api/tampilkan_dokter
-     } else if (match(hm->method, "GET") && match(hm->uri, "/api/tampilkan_dokter")) {
-       handle_tampilkan_dokter(c, hm, dokter, jumlah_dokter);
-       
-     // POST /api/tambah_dokter
-     } else if (match(hm->method, "POST") && match(hm->uri, "/api/tambah_dokter")) {
-       handle_tambah_dokter(c, hm, dokter, &jumlah_dokter);
- 
--    //POST/api/hapus_dokter 
-+    //POST/api/hapus_dokter
-     } else if (match(hm->method, "POST") && match(hm->uri, "/api/hapus_dokter")) {
-       handle_hapus_dokter(c, hm, dokter, &jumlah_dokter);
- 
--    // POST /buat/buat_jadwal 
-+    // POST /api/update_dokter
-+    } else if (match(hm->method, "POST") && match(hm->uri, "/api/update_dokter")) {
-+      handle_update_dokter(c, hm, dokter, jumlah_dokter);
-+
-+    // POST /buat/buat_jadwal
-     }else if (match(hm->method, "POST") && match(hm->uri, "/api/buat_jadwal")) {
-       handle_buat_jadwal(c, hm, dokter, jumlah_dokter, pelanggaran, jadwal, &jumlah_jadwal);
- 
-       // POST /api/tampilkan_jadwal_bulanan
-     }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_bulanan")) {
-       handle_tampilkan_jadwal_bulanan(c, hm, jadwal, jumlah_jadwal);
-       // POST /api/tampilkan_jadwal_mingguan
-     }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_mingguan")) {
-       handle_tampilkan_jadwal_mingguan(c, hm, jadwal, jumlah_jadwal);
-       
-       // POST /api/tampilkan_jadwal_harian
-     }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_jadwal_harian")) {
-       handle_tampilkan_jadwal_harian(c, hm, jadwal, jumlah_jadwal);
-       // POST /api/tampilkan_report_shift
-     }else if (match(hm->method, "POST") && match(hm->uri, "/api/tampilkan_report_shift")) {
-       handle_tampilkan_report_shift(c, hm, dokter, jumlah_dokter, pelanggaran);
-     }else if (match(hm->method, "OPTIONS")) {
-       mg_http_reply(c, 200,
-         "Access-Control-Allow-Origin: *\r\n"
-         "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
-         "Access-Control-Allow-Headers: Content-Type\r\n\r\n", "");
- 
-     // File statis
-     } else {
-       struct mg_http_serve_opts opts = {.root_dir = "web_root"};
-diff --git a/backend/routes/api_dokter.c b/backend/routes/api_dokter.c
-index 0fa070c5634d72fb6530ed205c89d5b9e7ce7164..1975e0168f8e00430e4c17d7e4a0ae20787181c0 100644
---- a/backend/routes/api_dokter.c
-+++ b/backend/routes/api_dokter.c
-@@ -44,50 +44,85 @@ void handle_tambah_dokter(struct mg_connection *c, struct mg_http_message *hm, s
-         "{ \"status\": \"success\", \"message\": \"Dokter berhasil ditambahkan\" }");
- }
- 
- void handle_hapus_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int *jumlah_dokter) {
- 
-     // Ambil data dari JSON body secara langsung
-     double id;
-     int valid = mg_json_get_num(hm->body, "$.id", &id);
- 
-     // Validasi input
-     if (!valid) {
-         mg_http_reply(c, 400,
-             "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-             "{ \"status\": \"error\", \"message\": \"Field tidak lengkap atau invalid\" }");
-         return;
-     }
- 
-     // Tambahkan dokter
-     hapus_dokter(dokter, jumlah_dokter, (int)id);
-     printf("Dokter dengan ID %d berhasil dihapus\n", (int)id);
-     mg_http_reply(c, 200,
-         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-         "{ \"status\": \"success\", \"message\": \"Dokter berhasil dihapus\" }");
- }
- 
-+void handle_update_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter) {
-+    double id_d;
-+    char *nama = mg_json_get_str(hm->body, "$.nama");
-+    int valid = mg_json_get_num(hm->body, "$.id", &id_d);
-+
-+    if (!valid || !nama) {
-+        mg_http_reply(c, 400,
-+            "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-+            "{ \"status\": \"error\", \"message\": \"Field tidak lengkap atau invalid\" }");
-+        if (nama) free(nama);
-+        return;
-+    }
-+
-+    int id = (int) id_d;
-+    int found = 0;
-+    for (int i = 0; i < jumlah_dokter; i++) {
-+        if (dokter[i].id == id) { found = 1; break; }
-+    }
-+
-+    if (!found) {
-+        mg_http_reply(c, 404,
-+            "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-+            "{ \"status\": \"error\", \"message\": \"Dokter tidak ditemukan\" }");
-+        free(nama);
-+        return;
-+    }
-+
-+    update_nama_dokter(dokter, jumlah_dokter, id, nama);
-+    simpan_dokter_ke_file(dokter, jumlah_dokter, "data/dokter.csv");
-+    mg_http_reply(c, 200,
-+        "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-+        "{ \"status\": \"success\", \"message\": \"Nama dokter diperbarui\" }");
-+    free(nama);
-+}
-+
- void handle_tampilkan_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter ) {
-     char json[4096];
-     tampilkan_dokter(dokter, jumlah_dokter, json, sizeof(json));
-     mg_http_reply(c, 200,
-         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-         "%s", json);
- }
- 
- void handle_buat_jadwal(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran, struct EntriJadwal *jadwal, int *jumlah_jadwal){
-     buat_jadwal(dokter, jumlah_dokter, pelanggaran, jadwal, jumlah_jadwal);
-     printf("Jadwal berhasil dibuat\n");
-     mg_http_reply(c, 200,
-         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-         "{ \"status\": \"success\", \"message\": \"Jadwal berhasil dibuat\" }");
-     simpan_jadwal_ke_file(jadwal, *jumlah_jadwal, "data/jadwal.csv");
- 
- };
- 
- void handle_tampilkan_jadwal_bulanan(struct mg_connection *c, struct mg_http_message *hm,
-                                      struct EntriJadwal *jadwal, int jumlah_jadwal) {
-     char json[4096];
-     tampilkan_jadwal_bulanan_json(jadwal, jumlah_jadwal, json, sizeof(json));
- 
-     mg_http_reply(c, 200,
-         "Content-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n",
-diff --git a/backend/routes/routes.h b/backend/routes/routes.h
-index 6978c0b5e059cd7ed621b0c44cc53e558e4bb9c3..31122eb1e0e9c8160cf336dd91fc3cdadf038821 100644
---- a/backend/routes/routes.h
-+++ b/backend/routes/routes.h
-@@ -1,23 +1,24 @@
- #ifndef ROUTES_H
- #define ROUTES_H
- 
- #include "../lib/mongoose/mongoose.h"
- #include "../lib/dokter/dokter.h"
- #include "../lib/jadwal/jadwal.h"
- 
- void handle_tes_get(struct mg_connection *c, struct mg_http_message *hm);
- void handle_tes_post(struct mg_connection *c, struct mg_http_message *hm);
- void handle_tampilkan_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter );
- void handle_tambah_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int *jumlah_dokter_input);
- void handle_hapus_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int *jumlah_dokter);
-+void handle_update_dokter(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter);
- void handle_buat_jadwal(struct mg_connection *c, struct mg_http_message *hm, struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran, struct EntriJadwal *jadwal, int *jumlah_jadwal);
- void handle_tampilkan_jadwal_bulanan(struct mg_connection *c, struct mg_http_message *hm,
-                                      struct EntriJadwal *jadwal, int jumlah_jadwal);
- void handle_tampilkan_jadwal_mingguan(struct mg_connection *c, struct mg_http_message *hm,
-                                       struct EntriJadwal *jadwal, int jumlah_jadwal);
- void handle_tampilkan_jadwal_harian(struct mg_connection *c, struct mg_http_message *hm,
-                                     struct EntriJadwal *jadwal, int jumlah_jadwal);
- void handle_tampilkan_report_shift(struct mg_connection *c, struct mg_http_message *hm,
-                                     struct Dokter *dokter, int jumlah_dokter, struct PelanggaranDokter *pelanggaran);
- #endif
- 
 diff --git a/frontend/src/components/dashboard/dokter/dokter.css b/frontend/src/components/dashboard/dokter/dokter.css
-index bc8c39bfb6ff7d635be7f3318c5f1f6a44089b65..6e0bb238cc61e94133129cc5550f1cb611fb0367 100644
+index bc8c39bfb6ff7d635be7f3318c5f1f6a44089b65..2a60a80543a22c0cc31dec534a1f406e590c158c 100644
 --- a/frontend/src/components/dashboard/dokter/dokter.css
 +++ b/frontend/src/components/dashboard/dokter/dokter.css
 @@ -40,33 +40,43 @@
@@ -311,12 +30,12 @@ index bc8c39bfb6ff7d635be7f3318c5f1f6a44089b65..6e0bb238cc61e94133129cc5550f1cb6
  
 +.btn-edit {
 +  padding: 4px 8px;
-+  margin-right: 4px;
-+  background-color: #28a745;
++  background-color: #ffc107;
 +  color: white;
 +  border: none;
 +  border-radius: 4px;
 +  cursor: pointer;
++  margin-right: 4px;
 +}
 +
  .btn-hapus {
@@ -328,10 +47,10 @@ index bc8c39bfb6ff7d635be7f3318c5f1f6a44089b65..6e0bb238cc61e94133129cc5550f1cb6
    cursor: pointer;
  }
 diff --git a/frontend/src/components/dashboard/dokter/dokter.jsx b/frontend/src/components/dashboard/dokter/dokter.jsx
-index 28f61bcadc5aa5439daca7a43af8a1a5b5395eb2..f4cf846d5c6f3dea98e88d25d94e7f0b545e9111 100644
+index 28f61bcadc5aa5439daca7a43af8a1a5b5395eb2..286f318757ae9c625cfcd370e43bed1d349ff1d4 100644
 --- a/frontend/src/components/dashboard/dokter/dokter.jsx
 +++ b/frontend/src/components/dashboard/dokter/dokter.jsx
-@@ -1,116 +1,142 @@
+@@ -1,116 +1,141 @@
  import React, { useEffect, useState } from "react";
 -import { tampilkan_dokter, tambah_dokter, hapus_dokter } from "../../../services/api";
 +import {
@@ -402,16 +121,15 @@ index 28f61bcadc5aa5439daca7a43af8a1a5b5395eb2..f4cf846d5c6f3dea98e88d25d94e7f0b
      }
    };
  
-+  const handleUpdate = async (id, currentName) => {
-+    const namaBaru = window.prompt("Masukkan nama baru", currentName);
-+    if (namaBaru && namaBaru !== currentName) {
-+      try {
-+        await update_dokter({ id: parseInt(id), nama: namaBaru });
-+        getData();
-+      } catch (err) {
-+        console.error(err);
-+        alert("Gagal mengupdate dokter.");
-+      }
++  const handleUpdate = async (id, nama) => {
++    const namaBaru = window.prompt("Masukkan nama baru", nama);
++    if (!namaBaru) return;
++    try {
++      await update_dokter({ id: parseInt(id), nama: namaBaru });
++      getData();
++    } catch (err) {
++      console.error(err);
++      alert("Gagal memperbarui nama dokter.");
 +    }
 +  };
 +
@@ -475,113 +193,3 @@ index 28f61bcadc5aa5439daca7a43af8a1a5b5395eb2..f4cf846d5c6f3dea98e88d25d94e7f0b
                  </select>
                  <label>Siang</label>
                  <select name="siang" value={form.siang} onChange={handleChange}>
-diff --git a/frontend/src/components/landing page/landingpage.jsx b/frontend/src/components/landing page/landingpage.jsx
-index c0e90e92ea912380756db8455cd1a8bfb9f6c24e..276610e0c409a0493be9a9707e8f9871bc9e7f57 100644
---- a/frontend/src/components/landing page/landingpage.jsx	
-+++ b/frontend/src/components/landing page/landingpage.jsx	
-@@ -1,31 +1,31 @@
- // src/components/LandingPage.jsx
- import React from "react";
- import { useNavigate } from "react-router-dom";
- import "./landingpage.css";
- 
--export default function LandingPage({ onEnter }) {
-+export default function LandingPage() {
-   const navigate = useNavigate();
-   return (
-     <div className="landing-container">
-       <header className="landing-header">
-         <div className="logo">RS Scheduler</div>
-         <button className="enter-btn" onClick={() => navigate("/dashboard/dokter")}>
-           Go to App
-         </button>
-       </header>
- 
-       <main className="landing-main">
-         <section className="hero-section">
-           <div className="hero-text">
-             <h1>Easy scheduling ahead</h1>
-             <p>Kelola jadwal shift dokter rumah sakit Anda dengan efisien, cepat, dan tanpa konflik.</p>
-             <div className="hero-actions">
-               <button className="google-btn">Sign up with Google</button>
-             </div>
-           </div>
-           <div className="hero-image">
-             <img src="/assets/schedule-preview.png" alt="Scheduler Preview" />
-           </div>
-         </section>
-       </main>
- 
-diff --git a/frontend/src/services/api.jsx b/frontend/src/services/api.jsx
-index a4ecb47374c8e767515f2c2c107b1a6457d0c54e..aa22289ddf6023862b957333b5e47d669576af63 100644
---- a/frontend/src/services/api.jsx
-+++ b/frontend/src/services/api.jsx
-@@ -1,58 +1,67 @@
- const BASE = "http://localhost:8001/api";
- 
- export async function fetchWelcomeName() {
--  const res = await fetch(`${BASE_URL}/tes_get`);
-+  const res = await fetch(`${BASE}/tes_get`);
-   if (!res.ok) throw new Error("Network response was not ok");
-   return res.json();
- }
- 
- export async function tampilkan_dokter() {
-   const res = await fetch(`${BASE}/tampilkan_dokter`);
-   if (!res.ok) throw new Error("Gagal fetch data dokter");
-   const data = await res.json();
-   return data;
- }
- 
- export async function tambah_dokter(data) {
-   const res = await fetch("http://localhost:8001/api/tambah_dokter", {
-     method: "POST",
-     headers: { "Content-Type": "application/json" },
-     body: JSON.stringify(data),
-   });
-   return res.json();
- }
- 
- export async function hapus_dokter(data) {
-   const res = await fetch("http://localhost:8001/api/hapus_dokter", {
-     method: "POST",
-     headers: { "Content-Type": "application/json" },
-     body: JSON.stringify(data),
-   });
-   return res.json();
- }
- 
-+export async function update_dokter(data) {
-+  const res = await fetch("http://localhost:8001/api/update_dokter", {
-+    method: "POST",
-+    headers: { "Content-Type": "application/json" },
-+    body: JSON.stringify(data),
-+  });
-+  return res.json();
-+}
-+
- export async function buatJadwal() {
-   const res = await fetch(`${BASE}/buat_jadwal`, { method: "POST" });
-   return await res.json();
- }
- 
- export async function tampilkanJadwalBulanan() {
-   const res = await fetch(`${BASE}/tampilkan_jadwal_bulanan`, {
-     method: "POST",
-   });
-   console.log("Response from tampilkanJadwalBulanan:", res);
-   return await res.json();
- }
- 
- export async function tampilkanJadwalMingguan(minggu) {
-   const res = await fetch(`${BASE}/tampilkan_jadwal_mingguan`, {
-     method: "POST",
-     headers: { "Content-Type": "application/json" },
-     body: JSON.stringify({ minggu }),
-   });
-   return await res.json();
- }
- 
- export async function tampilkanJadwalHarian(hari) {
-   const res = await fetch(`${BASE}/tampilkan_jadwal_harian`, {
-     method: "POST",
